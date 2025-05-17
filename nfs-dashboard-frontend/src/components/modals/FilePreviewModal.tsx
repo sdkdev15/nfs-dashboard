@@ -90,7 +90,6 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-64">
           <video controls className="max-h-60 max-w-full rounded" src={fileUrl}>
-            Your browser does not support the video tag.
           </video>
         </div>
       );
@@ -98,7 +97,6 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-20">
           <audio controls className="w-full" src={fileUrl}>
-            Your browser does not support the audio element.
           </audio>
         </div>
       );
@@ -117,8 +115,12 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
       // Optionally, fetch and display text content here
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-64">
-          <FileText className="h-16 w-16 mx-auto text-orange-500 mb-2" />
-          <p className="ml-3 text-gray-500">Text preview not implemented</p>
+          <iframe
+            src={fileUrl}
+            title={file.name}
+            className="w-full h-60 rounded"
+            style={{ background: '#fff' }}
+          />        
         </div>
       );
     } else {

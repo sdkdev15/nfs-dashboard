@@ -39,31 +39,41 @@ const UserManagement: React.FC = () => {
 
   // Add User
   const handleAddUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/admin/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token || ''
+  e.preventDefault();
+  setError('');
+  const token = localStorage.getItem('token');
+
+  try {
+    const usernameFromEmail = newUser.email.split('@')[0];
+
+    const res = await fetch(`${BACKEND_URL}/api/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token || ''
+      },
+      body: JSON.stringify({
+        email: newUser.email,
+        password: newUser.password,
+        name: usernameFromEmail,
+        role: {
+          id: Number(newUser.roleId)
         },
-        body: JSON.stringify({
-          email: newUser.email,
-          password: newUser.password,
-          role: { id: newUser.roleId }
-        })
-      });
-      if (!res.ok) throw new Error('Failed to add user');
-      const created = await res.json();
-      setUsers((prev) => [...prev, created]);
-      setShowAddModal(false);
-      setNewUser({ email: '', password: '', roleId: '' });
-    } catch (err: any) {
-      setError(err.message || 'Failed to add user');
-    }
-  };
+        twoFactorEnabled: false,
+        twoFASecret: ''
+      })
+    });
+
+    if (!res.ok) throw new Error('Failed to add user');
+    const created = await res.json();
+    setUsers((prev) => [...prev, created]);
+    setShowAddModal(false);
+    setNewUser({ email: '', password: '', roleId: '' });
+  } catch (err: any) {
+    setError(err.message || 'Failed to add user');
+  }
+};
+
 
   // Edit User
   const handleEditUser = (user: User) => {

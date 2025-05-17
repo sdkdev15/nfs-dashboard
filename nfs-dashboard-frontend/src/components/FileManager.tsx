@@ -5,7 +5,7 @@ import SearchBar from './SearchBar';
 import ActionBar from './ActionBar';
 import FileList from './FileList';
 import { Server } from 'lucide-react';
-import { getFiles, getBreadcrumbsFromPath, createFolder, uploadFile, deleteItem, renameItem } from '../utils/fileUtils';
+import { getFiles, getBreadcrumbsFromPath, createFolder, uploadFile, deleteItem, renameItem, downloadFile } from '../utils/fileUtils';
 import CreateFolderModal from './modals/CreateFolderModal';
 import DeleteConfirmModal from './modals/DeleteConfirmModal';
 import RenameModal from './modals/RenameModal';
@@ -145,8 +145,7 @@ const FileManager: React.FC<FileManagerProps> = ({ user }) => {
         break;
       case 'download':
         if (file.type === 'file') {
-          // In a real app, this would trigger a file download
-          console.log('Downloading:', file.name);
+          downloadFile(file);
         }
         break;
       default:

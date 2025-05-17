@@ -11,8 +11,7 @@
         "*"
       ]
     },
-    "twoFASecret": "RR7R34W2AI5VLEDAGI4ELCRJRQJE3GW3",
-    "twoFactorEnabled": true
+    "twoFactorEnabled": false
   },
   {
     "id": "2",

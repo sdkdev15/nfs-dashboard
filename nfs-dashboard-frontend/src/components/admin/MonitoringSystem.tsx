@@ -1,9 +1,16 @@
-// src/pages/MonitoringSystem.tsx
 import React, { useEffect, useState } from 'react';
-import type { MonitoringData } from '@/types';
-
+import type { MonitoringData, DiskInfo, FolderUsage } from '@/types';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
+
+const ProgressBar = ({ percent }: { percent: number }) => (
+  <div className="w-full bg-gray-200 rounded h-4 overflow-hidden">
+    <div
+      className="h-4 bg-gradient-to-r from-blue-500 to-cyan-400"
+      style={{ width: `${percent}%` }}
+    />
+  </div>
+);
 
 const MonitoringSystem: React.FC = () => {
   const [data, setData] = useState<MonitoringData | null>(null);
@@ -13,7 +20,7 @@ const MonitoringSystem: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     fetch(`${BACKEND_URL}/api/monitoring`, {
-      headers: { Authorization: token || '' }
+      headers: { Authorization: token || '' },
     })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch monitoring data');
@@ -24,75 +31,114 @@ const MonitoringSystem: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const getCpuUsagePercent = (data: MonitoringData) => {
+    const load1m = parseFloat(data.cpu_load['1m']);
+    if (isNaN(load1m) || data.cpu_cores === 0) return 0;
+    return (load1m / data.cpu_cores) * 100;
+  };
+
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Monitoring System</h2>
+    <div className="p-6 bg-gray-900 min-h-screen text-gray-100 font-sans">
+      <h2 className="text-3xl font-bold mb-8">Monitoring System</h2>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md">
-          {error}
-        </div>
+        <div className="mb-4 p-3 bg-red-700 text-red-100 rounded">{error}</div>
       )}
 
       {loading ? (
-        <div className="p-6 text-center text-gray-500">Loading...</div>
+        <div className="text-center text-gray-400">Loading...</div>
       ) : data ? (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">General Info</h3>
-            <p><strong>Status:</strong> {data.status}</p>
-            <p><strong>Uptime:</strong> {data.uptime}</p>
-            <p><strong>CPU Cores:</strong> {data.cpuCores}</p>
-            <p><strong>CPU Usage:</strong> {data.cpuUsagePercent.toFixed(2)}%</p>
-            <p><strong>RAM:</strong> {data.ramUsage.used} / {data.ramUsage.total} ({data.ramUsage.usagePercent})</p>
+        <>
+          {/* General Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gray-800 rounded-lg p-5 shadow hover:shadow-lg transition">
+              <h4 className="text-lg font-semibold mb-2">Status</h4>
+              <p className="text-xl">{data.status}</p>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-5 shadow hover:shadow-lg transition">
+              <h4 className="text-lg font-semibold mb-2">Uptime</h4>
+              <p className="text-xl">{data.uptime}</p>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-5 shadow hover:shadow-lg transition">
+              <h4 className="text-lg font-semibold mb-2">CPU Cores</h4>
+              <p className="text-xl">{data.cpu_cores}</p>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-5 shadow hover:shadow-lg transition">
+              <h4 className="text-lg font-semibold mb-2">CPU Usage</h4>
+              <p className="text-xl mb-2">{getCpuUsagePercent(data).toFixed(2)}%</p>
+              <ProgressBar percent={getCpuUsagePercent(data)} />
+            </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Storage</h3>
-            <table className="min-w-full table-auto">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left">Mount</th>
-                  <th className="px-4 py-2 text-left">Size</th>
-                  <th className="px-4 py-2 text-left">Used</th>
-                  <th className="px-4 py-2 text-left">Available</th>
-                  <th className="px-4 py-2 text-left">Usage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.storage.map((disk, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-4 py-2">{disk.mount}</td>
-                    <td className="px-4 py-2">{disk.size}</td>
-                    <td className="px-4 py-2">{disk.used}</td>
-                    <td className="px-4 py-2">{disk.available}</td>
-                    <td className="px-4 py-2">{disk.usage}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* RAM Usage Card */}
+          <div className="bg-gray-800 rounded-lg p-6 shadow mb-8">
+            <h3 className="text-xl font-semibold mb-4">Memory Usage</h3>
+            <p className="mb-2">
+              <strong>Used:</strong> {data.memory.used} / {data.memory.total}
+            </p>
+            <ProgressBar
+              percent={
+                ((parseFloat(data.memory.used) / parseFloat(data.memory.total)) *
+                  100) ||
+                0
+              }
+            />
+            <p className="text-sm mt-3 text-gray-400">
+              Free: {data.memory.free} | Shared: {data.memory.shared} | Buff/Cache:{' '}
+              {data.memory['buff/cache']} | Available: {data.memory.available}
+            </p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Folder Usage</h3>
-            <table className="min-w-full table-auto">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left">Path</th>
-                  <th className="px-4 py-2 text-left">Size</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.folders.map((folder, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-4 py-2">{folder.path}</td>
-                    <td className="px-4 py-2">{folder.size}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Disk Usage Cards */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Disk Usage</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.disks.map((disk: DiskInfo, i) => {
+                const usagePercent = parseFloat(disk.usePercent) || 0;
+                return (
+                  <div
+                    key={i}
+                    className="bg-gray-800 rounded-lg p-5 shadow hover:shadow-lg transition"
+                  >
+                    <h4 className="font-semibold mb-1">{disk.filesystem}</h4>
+                    <p className="text-sm text-gray-400 mb-2">{disk.mounted_on}</p>
+                    <p className="mb-2">
+                      {disk.used} / {disk.size} ({disk.type})
+                    </p>
+                    <ProgressBar percent={usagePercent} />
+                    <p className="mt-1 text-sm">{disk.usePercent} used</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+
+          {/* Folder Usage Table */}
+          <div className="mt-10">
+            <h3 className="text-xl font-semibold mb-4">Folder Usage</h3>
+            <div className="overflow-auto rounded-lg shadow">
+              <table className="min-w-full text-gray-100 bg-gray-800 table-auto">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Folder</th>
+                    <th className="px-4 py-2 text-left">Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.folder_usages.map((folder: FolderUsage, i) => (
+                    <tr key={i} className="border-b border-gray-700 hover:bg-gray-700">
+                      <td className="px-4 py-2">{folder.folder}</td>
+                      <td className="px-4 py-2">{folder.size}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) : null}
     </div>
   );

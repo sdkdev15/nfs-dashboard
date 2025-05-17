@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { User } from '../types';
-import { Settings, Smartphone } from 'lucide-react';
+import { Settings, Smartphone, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
@@ -72,6 +72,13 @@ const ProfilePage: React.FC = () => {
           <h1 className="ml-2 text-white font-bold">Profile</h1>
         </div>
         <nav className="mt-6">
+          <Link
+            to="/"
+            className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800"
+          >
+            <Home className="h-5 w-5 mr-3" />
+            NFS Manager
+          </Link>
           <Link
             to="/profile"
             className="flex items-center px-6 py-3 text-gray-300 bg-gray-800"

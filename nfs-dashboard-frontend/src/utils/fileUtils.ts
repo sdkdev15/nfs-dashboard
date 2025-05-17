@@ -39,7 +39,6 @@ export const getFileTypeIcon = (type: FileType, name: string): string => {
 };
 
 // CRUD Operations using backend API
-
 export const getFiles = async (path: string): Promise<FileItem[]> => {
   const token = localStorage.getItem('token');
   const res = await fetch(`${BACKEND_URL}/api/files?path=${encodeURIComponent(path)}`, {
@@ -70,6 +69,28 @@ export const createFolder = async (path: string, name: string): Promise<FileItem
   });
   if (!res.ok) throw new Error('Failed to create folder');
   return await res.json();
+};
+
+export const downloadFile = async (file: FileItem): Promise<void> => {
+  const token = localStorage.getItem('token');
+  const url = `${BACKEND_URL}/api/files/download?path=${encodeURIComponent(file.path)}&mode=download`;
+  
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { Authorization: token || '' }
+  });
+
+  if (!res.ok) throw new Error('Gagal mendownload file');
+
+  const blob = await res.blob();
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(downloadUrl);
 };
 
 export const uploadFile = async (path: string, file: File): Promise<FileItem> => {
@@ -112,6 +133,32 @@ export const renameItem = async (item: FileItem, newName: string): Promise<FileI
   if (!res.ok) throw new Error('Failed to rename item');
   return await res.json();
 };
+
+// export const copyItem = async (sourcePath: string, destinationPath: string): Promise<void> => {
+//   const token = localStorage.getItem('token');
+//   const res = await fetch(`${BACKEND_URL}/api/files/copy`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: token || ''
+//     },
+//     body: JSON.stringify({ sourcePath, destinationPath })
+//   });
+//   if (!res.ok) throw new Error('Failed to copy item');
+// };
+
+// export const moveItem = async (sourcePath: string, destinationPath: string): Promise<void> => {
+//   const token = localStorage.getItem('token');
+//   const res = await fetch(`${BACKEND_URL}/api/files/move`, {
+//     method: 'PUT',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: token || ''
+//     },
+//     body: JSON.stringify({ sourcePath, destinationPath })
+//   });
+//   if (!res.ok) throw new Error('Failed to move item');
+// };
 
 export const getBreadcrumbsFromPath = (path: string): { name: string; path: string }[] => {
   if (path === '/') {

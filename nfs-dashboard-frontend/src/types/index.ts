@@ -37,27 +37,36 @@ export interface User {
 export interface MonitoringData {
   status: string;
   uptime: string;
-  ramUsage: {
+  memory: {
     total: string;
     used: string;
     free: string;
-    usagePercent: string;
+    shared: string;
+    "buff/cache": string; 
+    available: string;
   };
-  cpuUsagePercent: number;
-  cpuCores: number;
-  storage: StorageInfo[];
-  folders: FolderUsage[];
+  cpu_cores: number;
+  cpu_load: {
+    '1m': string;
+    '5m': string;
+    '15m': string;
+  };
+  disks: DiskInfo[];
+  folder_usages: FolderUsage[];
 }
 
-export interface StorageInfo {
-  mount: string;
+export interface DiskInfo {
+  filesystem: string;
+  type: string;
   size: string;
   used: string;
   available: string;
-  usage: string;
+  usePercent: string; 
+  mounted_on: string;
 }
 
 export interface FolderUsage {
-  path: string;
+  folder: string;
   size: string;
 }
+
