@@ -28,6 +28,36 @@ export interface Permission {
 export interface User {
   id: string;
   email: string;
+  name: string;
   role: UserRole;
   twoFactorEnabled: boolean;
+  twoFASecret?: string;
+}
+
+export interface MonitoringData {
+  status: string;
+  uptime: string;
+  ramUsage: {
+    total: string;
+    used: string;
+    free: string;
+    usagePercent: string;
+  };
+  cpuUsagePercent: number;
+  cpuCores: number;
+  storage: StorageInfo[];
+  folders: FolderUsage[];
+}
+
+export interface StorageInfo {
+  mount: string;
+  size: string;
+  used: string;
+  available: string;
+  usage: string;
+}
+
+export interface FolderUsage {
+  path: string;
+  size: string;
 }

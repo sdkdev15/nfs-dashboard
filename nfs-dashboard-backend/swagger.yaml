@@ -1,0 +1,762 @@
+openapi: 3.0.3
+info:
+  title: NFS Dashboard API
+  version: 1.0.0
+  description: API documentation for the NFS Dashboard backend
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/auth/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+              required: [email, password]
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Registration failed
+
+  /api/auth/profile:
+    get:
+      summary: Get user profile
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
+  /api/files:
+    get:
+      summary: List files and folders
+      parameters:
+        - in: query
+          name: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: List of files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/File'
+    delete:
+      summary: Delete a file or folder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+              required: [path]
+      responses:
+        '204':
+          description: Deleted successfully
+        '400':
+          description: Bad request
+
+  /api/files/folder:
+    post:
+      summary: Create a new folder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                name:
+                  type: string
+              required: [path, name]
+      responses:
+        '201':
+          description: Folder created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '400':
+          description: Bad request
+
+  /api/files/upload:
+    post:
+      summary: Upload a file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                path:
+                  type: string
+              required: [file, path]
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '400':
+          description: Bad request
+
+  /api/files/rename:
+    put:
+      summary: Rename a file or folder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                newName:
+                  type: string
+              required: [path, newName]
+      responses:
+        '200':
+          description: Renamed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '400':
+          description: Bad request
+
+  /api/files/download:
+    get:
+      summary: Download a file
+      parameters:
+        - in: query
+          name: path
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: mode
+          schema:
+            type: string
+            enum: [preview, download]
+          required: false
+      responses:
+        '200':
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request
+        '404':
+          description: File not found
+
+  /api/files/preview:
+    get:
+      summary: Preview a file in browser
+      parameters:
+        - in: query
+          name: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: File preview
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request
+        '404':
+          description: File not found
+
+  /api/files/info:
+    get:
+      summary: Get file metadata
+      parameters:
+        - in: query
+          name: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: File metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '400':
+          description: Bad request
+        '404':
+          description: File not found
+
+  /api/files/stream:
+    get:
+      summary: Stream a file (supports HTTP range)
+      parameters:
+        - in: query
+          name: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '206':
+          description: Partial content (streamed)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request
+        '404':
+          description: File not found
+
+  /api/monitoring:
+    get:
+      summary: Get system monitoring data
+      responses:
+        '200':
+          description: Monitoring data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  uptime:
+                    type: string
+                    example: up 3 hours, 15 minutes
+                  cpu_cores:
+                    type: integer
+                    example: 8
+                  cpu_load:
+                    type: object
+                    properties:
+                      1m:
+                        type: string
+                        example: "0.35"
+                      5m:
+                        type: string
+                        example: "0.42"
+                      15m:
+                        type: string
+                        example: "0.38"
+                  memory:
+                    type: object
+                    properties:
+                      total:
+                        type: string
+                        example: "7956 MB"
+                      used:
+                        type: string
+                        example: "3245 MB"
+                      free:
+                        type: string
+                        example: "1345 MB"
+                      shared:
+                        type: string
+                        example: "112 MB"
+                      buff/cache:
+                        type: string
+                        example: "1002 MB"
+                      available:
+                        type: string
+                        example: "4556 MB"
+                  disks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filesystem:
+                          type: string
+                          example: /dev/sda1
+                        type:
+                          type: string
+                          example: ext4
+                        size:
+                          type: string
+                          example: 100G
+                        used:
+                          type: string
+                          example: 45G
+                        available:
+                          type: string
+                          example: 50G
+                        use%:
+                          type: string
+                          example: "45%"
+                        mounted_on:
+                          type: string
+                          example: /
+                  folder_usages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        folder:
+                          type: string
+                          example: var
+                        size:
+                          type: string
+                          example: "320M"
+
+  /api/admin/users:
+    get:
+      summary: Get all users (admin)
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Create a user (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+    put:
+      summary: Update a user (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+    delete:
+      summary: Delete a user (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+              required: [id]
+      responses:
+        '204':
+          description: User deleted
+        '400':
+          description: Bad request
+
+  /api/admin/users/{id}:
+    get:
+      summary: Get user by ID (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+    put:
+      summary: Update a user (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '204':
+          description: User updated
+        '400':
+          description: Bad request
+    delete:
+      summary: Delete a user (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          description: User not found
+
+  /api/admin/users/bulk-delete:
+    post:
+      summary: Bulk delete users (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required: [ids]
+      responses:
+        '204':
+          description: Users deleted
+        '400':
+          description: Bad request
+
+  /api/admin/users/{id}/disable-2fa:
+    post:
+      summary: Disable 2FA for a user (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: 2FA disabled
+        '500':
+          description: Failed to disable 2FA
+
+  /api/admin/roles:
+    get:
+      summary: Get all roles (admin)
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+    post:
+      summary: Create a role (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '201':
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: Bad request
+
+  /api/admin/roles/{id}:
+    get:
+      summary: Get role by ID (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Role found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Role not found
+    put:
+      summary: Update a role (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '204':
+          description: Role updated
+        '400':
+          description: Bad request
+    delete:
+      summary: Delete a role (admin)
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: Role deleted
+        '404':
+          description: Role not found
+
+  /api/admin/audit-logs:
+    get:
+      summary: Get audit logs (admin)
+      responses:
+        '200':
+          description: List of audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+
+  /api/admin/settings:
+    get:
+      summary: Get system settings (admin)
+      responses:
+        '200':
+          description: System settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettings'
+    put:
+      summary: Update system settings (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemSettings'
+      responses:
+        '200':
+          description: Settings updated
+
+  /api/logout:
+    post:
+      summary: Logout user
+      responses:
+        '200':
+          description: Logged out
+
+  /api/change-password:
+    post:
+      summary: Change user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+              required: [oldPassword, newPassword]
+      responses:
+        '200':
+          description: Password changed
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+
+  /api/disable-2fa:
+    post:
+      summary: Disable two-factor authentication
+      responses:
+        '200':
+          description: 2FA disabled
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        twoFASecret:
+          type: string
+        twoFactorEnabled:
+          type: boolean
+    File:
+      type: object
+      required: [name, path, is_dir]
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        is_dir:
+          type: boolean
+        size:
+          type: integer
+        lastModified:
+          type: string
+          format: date-time
+    Role:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    SystemSettings:
+      type: object
+      required: [max_file_size, allowed_file_types, max_storage_per_user, enable_audit_log, session_timeout]
+      properties:
+        max_file_size:
+          type: integer
+        allowed_file_types:
+          type: string
+        max_storage_per_user:
+          type: integer
+        enable_audit_log:
+          type: boolean
+        session_timeout:
+          type: integer
+    AuditLog:
+      type: object
+      required: [id, action, userId, timestamp, details]
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        userId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: string

@@ -1,57 +1,62 @@
-# nfs-dashboard-backend
+# NFS Dashboard Backend
 
-## Overview
-The nfs-dashboard-backend project is a Node.js application built with TypeScript that provides authentication functionalities for the NFS Dashboard. It includes features such as user registration, login, and two-factor authentication.
+This is the backend application for the NFS Dashboard, built to manage and monitor Network File System (NFS) resources.
 
-## Project Structure
-```
-nfs-dashboard-backend
-├── src
-│   ├── controllers         # Contains controllers for handling requests
-│   │   └── authController.ts
-│   ├── routes              # Defines the routes for the application
-│   │   └── authRoutes.ts
-│   ├── services            # Contains business logic for authentication
-│   │   └── authService.ts
-│   ├── models              # Defines the data models
-│   │   └── userModel.ts
-│   ├── middlewares         # Middleware functions for authentication
-│   │   └── authMiddleware.ts
-│   ├── utils               # Utility functions
-│   │   └── tokenUtil.ts
-│   └── app.ts              # Entry point of the application
-├── package.json            # NPM configuration file
-├── tsconfig.json           # TypeScript configuration file
-└── README.md               # Project documentation
-```
+## Features
+
+- User authentication and management.
+- File upload, retrieval, and deletion.
+- RESTful API for frontend integration.
+
+## Prerequisites
+
+- Go 1.16+
+- Docker (for containerization)
 
 ## Installation
+
 1. Clone the repository:
-   ```
-   git clone <repository-url>
-   ```
-2. Navigate to the project directory:
-   ```
+
+   ```bash
+   git clone https://github.com/your-repo/nfs-dashboard-backend.git
    cd nfs-dashboard-backend
    ```
-3. Install the dependencies:
+
+2. Run the docker build and docker run:
+
+   ```bash
+   docker build -t nfs-dashboard-backend .
    ```
-   npm install
+
+   ```bash
+   docker run -p 8080:8080 nfs-dashboard-backend
    ```
 
 ## Usage
-To start the application, run:
-```
-npm start
+
+1. Start the application using Docker.
+2. Open your browser and navigate to:
+   ```
+   http://localhost:8080
+   ```
+
+## Build for Production
+
+To create a production build, run:
+```bash
+docker build -t nfs-dashboard-backend .
 ```
 
-## API Endpoints
-- **POST /api/auth/login**: Authenticate a user and return a token.
-- **POST /api/auth/register**: Register a new user.
-- **POST /api/auth/two-factor**: Set up or verify two-factor authentication.
+The build artifacts will be stored in the specified directory.
 
 ## Contributing
-Contributions are welcome! Please submit a pull request or open an issue for any suggestions or improvements.
+
+Contributions are welcome! Please follow the contribution guidelines.
 
 ## License
+
 This project is licensed under the MIT License.
+
+## Contact
+
+For any inquiries or support, please contact [your-email@example.com](mailto:your-email@example.com).

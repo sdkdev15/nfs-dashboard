@@ -1,23 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Save, RefreshCw } from 'lucide-react';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
+
+// Default settings (match OpenAPI property names)
+const DEFAULT_SETTINGS = {
+  max_file_size: 100,
+  allowed_file_types: '.jpg,.png,.pdf,.doc,.docx',
+  max_storage_per_user: 5,
+  enable_audit_log: false,
+  session_timeout: 30,
+};
+
 const SystemSettings: React.FC = () => {
-  const [settings, setSettings] = useState({
-    maxFileSize: 100,
-    allowedFileTypes: '.jpg,.png,.pdf,.doc,.docx',
-    maxStoragePerUser: 5,
-    enableAuditLog: true,
-    sessionTimeout: 30,
-  });
+  const [settings, setSettings] = useState<any>(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch(`${BACKEND_URL}/api/admin/settings`, { headers: { Authorization: token || '' } })
+      .then(res => res.json())
+      .then(data => {
+        setSettings({ ...DEFAULT_SETTINGS, ...data });
+        setLoading(false);
+      })
+      .catch(() => {
+        setSettings(DEFAULT_SETTINGS);
+        setLoading(false);
+      });
+  }, []);
 
   const handleSave = async () => {
-    try {
-      // In a real app, you would save these settings to the database
-      console.log('Saving settings:', settings);
-    } catch (error) {
-      console.error('Error saving settings:', error);
-    }
+    const token = localStorage.getItem('token');
+    await fetch(`${BACKEND_URL}/api/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token || ''
+      },
+      body: JSON.stringify(settings)
+    });
+    // Optionally show a success message
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
@@ -40,9 +68,9 @@ const SystemSettings: React.FC = () => {
             </label>
             <input
               type="number"
-              value={settings.maxFileSize}
+              value={settings.max_file_size}
               onChange={(e) =>
-                setSettings({ ...settings, maxFileSize: Number(e.target.value) })
+                setSettings({ ...settings, max_file_size: Number(e.target.value) })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
@@ -54,9 +82,9 @@ const SystemSettings: React.FC = () => {
             </label>
             <input
               type="text"
-              value={settings.allowedFileTypes}
+              value={settings.allowed_file_types}
               onChange={(e) =>
-                setSettings({ ...settings, allowedFileTypes: e.target.value })
+                setSettings({ ...settings, allowed_file_types: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
@@ -68,11 +96,11 @@ const SystemSettings: React.FC = () => {
             </label>
             <input
               type="number"
-              value={settings.maxStoragePerUser}
+              value={settings.max_storage_per_user}
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  maxStoragePerUser: Number(e.target.value),
+                  max_storage_per_user: Number(e.target.value),
                 })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -85,11 +113,11 @@ const SystemSettings: React.FC = () => {
             </label>
             <input
               type="number"
-              value={settings.sessionTimeout}
+              value={settings.session_timeout}
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  sessionTimeout: Number(e.target.value),
+                  session_timeout: Number(e.target.value),
                 })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -100,11 +128,11 @@ const SystemSettings: React.FC = () => {
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={settings.enableAuditLog}
+                checked={settings.enable_audit_log}
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    enableAuditLog: e.target.checked,
+                    enable_audit_log: e.target.checked,
                   })
                 }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"

@@ -1,0 +1,129 @@
+{
+  "info": {
+    "name": "NFS Dashboard API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for testing NFS Dashboard backend API"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": { "raw": "http://localhost:8080/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "auth", "login"] }
+      }
+    },
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"user123\",\n  \"name\": \"Regular User\"\n}"
+        },
+        "url": { "raw": "http://localhost:8080/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "auth", "register"] }
+      }
+    },
+    {
+      "name": "Auth - Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "dummy-token-for-admin@example.com" }
+        ],
+        "url": { "raw": "http://localhost:8080/api/auth/profile", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "auth", "profile"] }
+      }
+    },
+    {
+      "name": "Files - List Files",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/files?path=.", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "files"], "query": [{ "key": "path", "value": "." }] }
+      }
+    },
+    {
+      "name": "Files - Create Folder",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"path\": \".\",\n  \"name\": \"new_folder\"\n}"
+        },
+        "url": { "raw": "http://localhost:8080/api/files/folder", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "files", "folder"] }
+      }
+    },
+    {
+      "name": "Files - Upload File",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" },
+            { "key": "path", "value": ".", "type": "text" }
+          ]
+        },
+        "url": { "raw": "http://localhost:8080/api/files/upload", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "files", "upload"] }
+      }
+    },
+    {
+      "name": "Files - Rename Item",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"path\": \"./oldname.txt\",\n  \"newName\": \"newname.txt\"\n}"
+        },
+        "url": { "raw": "http://localhost:8080/api/files/rename", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "files", "rename"] }
+      }
+    },
+    {
+      "name": "Files - Delete Item",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"path\": \"./file_or_folder_to_delete\"\n}"
+        },
+        "url": { "raw": "http://localhost:8080/api/files", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "files"] }
+      }
+    },
+    {
+      "name": "Monitoring - Get Monitoring Data",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/monitoring", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "monitoring"] }
+      }
+    },
+    {
+      "name": "Admin - Manage Users",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/admin/users", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "admin", "users"] }
+      }
+    },
+    {
+      "name": "Admin - Manage Roles",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/admin/roles", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "admin", "roles"] }
+      }
+    },
+    {
+      "name": "Admin - System Settings",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/admin/settings", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "admin", "settings"] }
+      }
+    }
+  ]
+}

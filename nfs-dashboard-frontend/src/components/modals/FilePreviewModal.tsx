@@ -3,6 +3,8 @@ import { X, Download, FileText, Image, Video, File, Archive, Music } from 'lucid
 import { FileItem } from '../../types';
 import { formatFileSize, getFileTypeIcon } from '../../utils/fileUtils';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
+
 interface FilePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,43 +71,54 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
-  // For this demo we'll just show placeholders since we don't have actual file data
+  // Construct the download/preview URL
+  const fileUrl = `${BACKEND_URL}/api/files/download?path=${encodeURIComponent(file.path)}`;
+
   const renderPreview = () => {
     if (isImage()) {
-      // In a real app, you would use the actual file URL
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-64">
-          <div className="text-center p-4">
-            <Image className="h-16 w-16 mx-auto text-purple-500 mb-2" />
-            <p className="text-gray-500">Image preview would be shown here</p>
-          </div>
+          <img
+            src={fileUrl}
+            alt={file.name}
+            className="max-h-60 max-w-full object-contain rounded"
+            style={{ background: '#fff' }}
+          />
         </div>
       );
     } else if (isVideo()) {
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-64">
-          <div className="text-center p-4">
-            <Video className="h-16 w-16 mx-auto text-red-500 mb-2" />
-            <p className="text-gray-500">Video player would be shown here</p>
-          </div>
+          <video controls className="max-h-60 max-w-full rounded" src={fileUrl}>
+            Your browser does not support the video tag.
+          </video>
         </div>
       );
     } else if (isAudio()) {
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-20">
-          <div className="text-center p-4">
-            <Music className="h-10 w-10 mx-auto text-green-500 mb-2" />
-            <p className="text-gray-500">Audio player would be shown here</p>
-          </div>
+          <audio controls className="w-full" src={fileUrl}>
+            Your browser does not support the audio element.
+          </audio>
         </div>
       );
     } else if (isPdf()) {
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg h-64">
-          <div className="text-center p-4">
-            <FileText className="h-16 w-16 mx-auto text-orange-500 mb-2" />
-            <p className="text-gray-500">PDF preview would be shown here</p>
-          </div>
+          <iframe
+            src={fileUrl}
+            title={file.name}
+            className="w-full h-60 rounded"
+            style={{ background: '#fff' }}
+          />
+        </div>
+      );
+    } else if (isText()) {
+      // Optionally, fetch and display text content here
+      return (
+        <div className="flex items-center justify-center bg-gray-100 rounded-lg h-64">
+          <FileText className="h-16 w-16 mx-auto text-orange-500 mb-2" />
+          <p className="ml-3 text-gray-500">Text preview not implemented</p>
         </div>
       );
     } else {

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  golang-dev:
+    image: golang:latest
+    container_name: go-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8008:8080"  
+    tty: true        
+    networks:
+      - nfs-network
+
+networks:
+  nfs-network:
+    driver: bridge

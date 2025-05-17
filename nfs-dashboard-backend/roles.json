@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "admin",
+    "permissions": [
+      "*"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "user",
+    "permissions": [
+      "write:/tmp",
+      "read:/tmp"
+    ]
+  }
+]

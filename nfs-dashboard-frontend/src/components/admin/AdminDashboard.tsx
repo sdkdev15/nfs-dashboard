@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
-import { Users, Shield, Settings, LogOut } from 'lucide-react';
+import { Users, Shield, Settings, LogOut, Home, Monitor } from 'lucide-react'; 
 import UserManagement from './UserManagement';
 import RoleManagement from './RoleManagement';
 import SystemSettings from './SystemSettings';
+import MonitoringSystem from './MonitoringSystem';
 import ProfileDropdown from '../ProfileDropdown';
-import { User } from '../../types';
+import { User } from '@/types';
 
 interface AdminDashboardProps {
   user: User;
@@ -34,6 +35,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }) => {
         </div>
         
         <nav className="mt-6">
+          <Link
+            to="/"
+            className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800"
+            onClick={() => setActiveTab('dashboard')}
+          >
+            <Home className="h-5 w-5 mr-3" />
+            NFS Manager
+          </Link>
           <Link
             to="/admin/users"
             className={`flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 ${
@@ -66,6 +75,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }) => {
             <Settings className="h-5 w-5 mr-3" />
             System Settings
           </Link>
+
+          <Link
+            to="/admin/monitoring"
+            className={`flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 ${
+              activeTab === 'monitoring' ? 'bg-gray-800' : ''
+            }`}
+            onClick={() => setActiveTab('monitoring')}
+          >
+            <Monitor className="h-5 w-5 mr-3" />
+            Monitoring System
+          </Link>
         </nav>
 
         <div className="absolute bottom-0 w-full">
@@ -82,9 +102,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }) => {
       {/* Main content */}
       <div className="ml-64 pt-20 p-8">
         <Routes>
+          <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="roles" element={<RoleManagement />} />
           <Route path="settings" element={<SystemSettings />} />
+          <Route path="monitoring" element={<MonitoringSystem />} /> 
           <Route path="*" element={<Navigate to="users" replace />} />
         </Routes>
       </div>

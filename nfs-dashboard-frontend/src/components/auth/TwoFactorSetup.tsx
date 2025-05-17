@@ -1,24 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User } from '../../types';
 
-const TwoFactorSetup: React.FC = () => {
+interface TwoFactorSetupProps {
+  user: User;
+}
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
+
+const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({ user }) => {
   const [secret, setSecret] = useState('');
   const [qrCode, setQrCode] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(10);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const generateSecret = async () => {
       try {
-        const response = await fetch('/api/generate-2fa-secret', {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${BACKEND_URL}/api/generate-2fa-secret`, {
           method: 'POST',
+          headers: {
+            Authorization: token || '',
+          },
         });
-        
+
+        if (!response.ok) throw new Error('Failed to generate 2FA secret');
         const data = await response.json();
         setSecret(data.secret);
-        
+
         const qrCodeUrl = `otpauth://totp/NFSExplorer:${data.email}?secret=${data.secret}&issuer=NFSExplorer`;
         const qrCodeImage = await QRCode.toDataURL(qrCodeUrl);
         setQrCode(qrCodeImage);
@@ -30,15 +44,34 @@ const TwoFactorSetup: React.FC = () => {
     generateSecret();
   }, []);
 
+  useEffect(() => {
+    if (success) {
+      const interval = setInterval(() => {
+        setRedirectCountdown((prev) => prev - 1);
+      }, 1000);
+
+      const timeout = setTimeout(() => {
+        navigate('/');
+      }, 10000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [success, navigate]);
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     try {
-      const response = await fetch('/api/verify-2fa', {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${BACKEND_URL}/api/verify-2fa`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: token || '',
         },
         body: JSON.stringify({
           secret,
@@ -61,6 +94,7 @@ const TwoFactorSetup: React.FC = () => {
       </div>
       
       <h2 className="text-2xl font-bold text-center mb-6">
+        Welcome {user.name}
         Set Up Two-Factor Authentication
       </h2>
 
@@ -127,6 +161,15 @@ const TwoFactorSetup: React.FC = () => {
           <p className="text-gray-600">
             Your account is now protected with two-factor authentication.
           </p>
+          <p className="text-gray-500 mt-4">
+            Returning to home in {redirectCountdown} seconds...
+          </p>
+          <button
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => navigate('/')}
+          >
+            Return to Home Now
+          </button>
         </div>
       )}
     </div>

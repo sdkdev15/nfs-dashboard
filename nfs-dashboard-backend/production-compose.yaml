@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    networks:
+      - nfs-network
+
+networks:
+  nfs-network:
+    driver: bridge
+
+volumes:
+  nfs-data:
+    driver: local

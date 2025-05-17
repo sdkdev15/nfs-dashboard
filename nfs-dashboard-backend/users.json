@@ -1,0 +1,31 @@
+[
+  {
+    "id": "1",
+    "email": "admin@example.com",
+    "password": "admin123",
+    "name": "admin",
+    "role": {
+      "id": 1,
+      "name": "admin",
+      "permissions": [
+        "*"
+      ]
+    },
+    "twoFASecret": "RR7R34W2AI5VLEDAGI4ELCRJRQJE3GW3",
+    "twoFactorEnabled": true
+  },
+  {
+    "id": "2",
+    "email": "user@example.com",
+    "password": "user123",
+    "name": "user",
+    "role": {
+      "id": 2,
+      "name": "user",
+      "permissions": [
+        "read"
+      ]
+    },
+    "twoFactorEnabled": false
+  }
+]
